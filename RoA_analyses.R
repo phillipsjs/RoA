@@ -6,7 +6,7 @@
 ####   Contact: phillips01@g.harvard.edu                              ###
   
 #### directory and packages #####
-setwd("C:/Users/Jonathan/Documents/currentProjects/Counterfactuals/Cognition_Revision")
+setwd("C:/Users/Jphil/Documents/currentProjects/Counterfactuals/Cognition_Revision")
 
 library(tidyr)
 library(mediation)
@@ -172,13 +172,13 @@ d.2a.1_long <- gather(d.2a.1[,1:5], question, response, mediator:asstcause)
 ## causation judgments
 aggregate(response~question,d.2a.1_long[d.2a.1_long$question!="mediator",],FUN=function(x) c(M =mean(x), SD =sd(x)))
 var.test(
-  d.2a.1_long$response[d.2a.1_long$question=="profcause"],
+  d.2a.1_long$response[d.2a.1_long$question=="dv"],
   d.2a.1_long$response[d.2a.1_long$question=="asstcause"])
 t.test(
-  d.2a.1_long$response[d.2a.1_long$question=="profcause"],
+  d.2a.1_long$response[d.2a.1_long$question=="dv"],
   d.2a.1_long$response[d.2a.1_long$question=="asstcause"],paired=T,var.equal=T)
 cohensD(
-  d.2a.1_long$response[d.2a.1_long$question=="profcause"],
+  d.2a.1_long$response[d.2a.1_long$question=="dv"],
   d.2a.1_long$response[d.2a.1_long$question=="asstcause"])
 # t(399)=20.306, p<.001, d=1.648 
 
@@ -318,10 +318,10 @@ t.test(d.4b$dv[d.4b$condition=="counterfactual"],
        d.4b$dv[d.4b$condition=="control"])
 cohensD(d.4b$dv[d.4b$condition=="counterfactual"],
         d.4b$dv[d.4b$condition=="control"])
-#t(226) = 2.44, p=.016, d=0.324
+#t(226) = 2.47, p=.016, d=0.324
 
 #### Study 5 ####
-d.5$condition <- factor(c("Irrelevant Possibility","Relevant Possibility")[d.5$condition+1])
+d.5$condition <- factor(c("Irrelevant Counterfactual","Relevant Counterfactual")[d.5$condition+1])
 d.5$possibility_result <- factor(c("Did not alter outcome","Altered outcome")[d.5$possibility_result+1])
 
 # all responses to causation question
@@ -349,3 +349,54 @@ t.test(d.5$dv[d.5$condition=="Irrelevant Possibility" & d.5$possibility_result==
 cohensD(d.5$dv[d.5$condition=="Irrelevant Possibility" & d.5$possibility_result=="Altered outcome"],
         d.5$dv[d.5$condition=="Relevant Possibility" & d.5$possibility_result=="Altered outcome"])
 # t(98.046)=-7.040, p<.001, d=1.212
+
+
+d1.sum <- ddply(d.5, c("condition"), summarise,
+                N    = length(dv),
+                mean = mean(dv, na.rm=TRUE),
+                sd   = sd(dv,na.rm=TRUE),
+                se   = sd / sqrt(N) )
+
+d1.plot <- ggplot(d1.sum, aes(x=condition, y=mean, fill=condition)) +
+  geom_bar(stat="identity", position="dodge") +
+  scale_fill_manual(values=wes_palette("Royal1",2)) + 
+  #facet_wrap(~withIn_between) +
+  ylab("Professor Smith Caused Martin's failing") +
+  xlab("") +
+  coord_cartesian(ylim=c(1,4)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), width=.1, position=position_dodge(.9)) +
+  theme_bw() +
+  theme(
+    plot.background = element_blank()
+    ,panel.grid.major = element_blank()
+    ,panel.grid.minor = element_blank()
+    ,legend.position="null"
+    ,legend.title=element_blank()
+    ,legend.text=element_text(size=rel(1.5))
+    ,axis.text.x=element_text(size=rel(1.75))
+    ,axis.text.y=element_text(size=rel(1.25))
+    ,axis.title=element_text(size=rel(1.5))
+    ,strip.text = element_text(size = rel(1.7))
+    ,axis.title.y = element_text(vjust = 0.75)
+  )
+
+
+d1.plot2 <- ggplot(d.5,aes(x=condition, fill=possibility_result)) +
+  geom_bar(position="stack") +
+  scale_fill_manual(values=wes_palette("Royal1",2)) + 
+  #facet_grid( ~ Agent) +
+  theme_bw() +
+  xlab("") +
+  theme(
+    plot.background = element_blank()
+    ,panel.grid.major = element_blank()
+    ,panel.grid.minor = element_blank()
+    #,legend.position="null"
+    ,legend.title=element_blank()
+    ,legend.text=element_text(size=rel(1.5))
+    ,axis.text.x=element_text(size=rel(1.75))
+    ,axis.text.y=element_text(size=rel(1.25))
+    ,axis.title=element_text(size=rel(1.5))
+    ,strip.text = element_text(size = rel(1.7))
+    ,axis.title.y = element_text(vjust = 0.75)
+  )
